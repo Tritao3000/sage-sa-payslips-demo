@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payslip Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8faf9;
+      --bg-card: #ffffff;
+      --border: #e2e8e4;
+      --border-light: #f0f4f1;
+      --text-primary: #1a2e1a;
+      --text-secondary: #5a6b5a;
+      --text-muted: #8a9b8a;
+      --accent: #16a34a;
+      --accent-light: #22c55e;
+      --accent-bg: #f0fdf4;
+      --accent-border: #bbf7d0;
+      --success: #16a34a;
+      --warning: #ca8a04;
+      --danger: #dc2626;
+      --increase: #16a34a;
+      --decrease: #dc2626;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      border-radius: 16px;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    select:hover {
+      border-color: var(--accent);
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.875rem 0;
+    }
+
+    .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      text-transform: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    button {
+      padding: 0.875rem 2rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .results {
+      display: none;
+    }
+
+    .results.active {
+      display: block;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text-primary);
+    }
+
+    .stat-value.positive {
+      color: var(--increase);
+    }
+
+    .stat-value.negative {
+      color: var(--decrease);
+    }
+
+    /* Main Content Cards */
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .card-header .icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-bg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Explanation Card */
+    .explanation-card {
+      border: 2px solid var(--accent-border);
+      background: linear-gradient(to bottom, var(--accent-bg), var(--bg-card));
+    }
+
+    .explanation-card .card-header {
+      background: var(--accent-bg);
+      border-bottom-color: var(--accent-border);
+    }
+
+    .explanation-text {
+      font-size: 1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    /* Impact Tree */
+    .impact-tree {
+      padding: 0.5rem 0;
+    }
+
+    .impact-node {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .impact-node::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .impact-node:last-child::before {
+      display: none;
+    }
+
+    .impact-item {
+      position: relative;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .impact-item:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .impact-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem;
+      top: 50%;
+      width: 1.5rem;
+      height: 2px;
+      background: var(--border);
+    }
+
+    .impact-item.root {
+      background: var(--accent-bg);
+      border-color: var(--accent-border);
+    }
+
+    .impact-item.root::before {
+      display: none;
+    }
+
+    .impact-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .impact-badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .impact-badge.increase {
+      background: rgba(22, 163, 74, 0.1);
+      color: var(--success);
+    }
+
+    .impact-badge.decrease {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--danger);
+    }
+
+    .impact-badge.added {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    .impact-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .impact-detail {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .impact-amount {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+    }
+
+    .impact-children {
+      margin-top: 0.5rem;
+      padding-left: 1.5rem;
+      border-left: 2px dashed var(--border);
+    }
+
+    .impact-arrow {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .impact-arrow::before {
+      content: '';
+      width: 16px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* LLM Badge */
+    .llm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.6rem;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .llm-badge.disabled {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 1.5rem;
+      color: var(--danger);
+      text-align: center;
+      display: none;
+    }
+
+    .error-message.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+
+      <h1>Payslip Comparison</h1>
+      <p class="subtitle">Understand your payslip changes with AI-powered analysis</p>
+    </header>
+
+    <div class="controls">
+      <div class="controls-row">
+        <div class="form-group">
+          <label for="period-select">Select Period to Analyze</label>
+          <select id="period-select">
+            <option value="">Loading periods...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="use-llm" checked>
+            <label for="use-llm">Use AI Narration</label>
+            <span id="llm-status" class="llm-badge">Checking...</span>
+          </div>
+        </div>
+        <button id="compare-btn" disabled>Analyze Changes</button>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="color: var(--text-secondary);">Analyzing your payslip changes...</p>
+    </div>
+
+    <div class="error-message" id="error"></div>
+
+    <div class="results" id="results">
+      <div class="summary-grid">
+        <div class="stat-card">
+          <div class="stat-label">Previous</div>
+          <div class="stat-value" id="prev-period">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Current</div>
+          <div class="stat-value" id="curr-period">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Net Pay Change</div>
+          <div class="stat-value" id="net-change">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Changes</div>
+          <div class="stat-value" id="total-changes">-</div>
+        </div>
+      </div>
+
+      <div class="content-card explanation-card">
+        <div class="card-header">
+          <h3>Summary</h3>
+        </div>
+        <div class="card-body">
+          <div class="explanation-text" id="explanation">-</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+
+          <h3>Impact Breakdown</h3>
+        </div>
+        <div class="card-body">
+          <div class="impact-tree" id="impact-tree"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const periodSelect = document.getElementById('period-select');
+    const useLlmCheckbox = document.getElementById('use-llm');
+    const llmStatus = document.getElementById('llm-status');
+    const compareBtn = document.getElementById('compare-btn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const results = document.getElementById('results');
+
+    let periods = [];
+    let llmAvailable = false;
+
+    function formatZAR(amount) {
+      const prefix = amount >= 0 ? '' : '-';
+      return prefix + 'ZAR ' + Math.abs(amount).toLocaleString('en-ZA', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
+    }
+
+    // Build hierarchical impact tree
+    function buildImpactTree(facts) {
+      const tree = document.getElementById('impact-tree');
+      tree.innerHTML = '';
+
+      // Group facts by their relationships
+      const netPayFact = facts.find(f => f.type === 'net_pay_change');
+      const taxFacts = facts.filter(f => f.type === 'tax_impact');
+      const causalFacts = facts.filter(f => f.type === 'causal');
+      const earningChanges = facts.filter(f => ['earning_change', 'earning_added', 'earning_removed'].includes(f.type));
+      const deductionChanges = facts.filter(f => ['deduction_change', 'deduction_added', 'deduction_removed'].includes(f.type));
+
+      // Root: Net Pay
+      if (netPayFact) {
+        const rootNode = createImpactNode(netPayFact, true);
+        tree.appendChild(rootNode);
+
+        // Add arrow indicating causes
+        if (causalFacts.length > 0 || taxFacts.length > 0 || deductionChanges.length > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'impact-arrow';
+          arrow.textContent = 'caused by';
+          tree.appendChild(arrow);
+        }
+      }
+
+      // Group: Tax & Statutory
+      if (taxFacts.length > 0) {
+        const taxSection = document.createElement('div');
+        taxSection.className = 'impact-node';
+        
+        taxFacts.forEach(fact => {
+          taxSection.appendChild(createImpactNode(fact));
+        });
+
+        // Find related causal explanations
+        const taxCausals = causalFacts.filter(f => 
+          f.sentence.toLowerCase().includes('paye') || 
+          f.sentence.toLowerCase().includes('tax')
+        );
+        if (taxCausals.length > 0) {
+          const children = document.createElement('div');
+          children.className = 'impact-children';
+          taxCausals.forEach(f => {
+            const note = document.createElement('div');
+            note.className = 'impact-detail';
+            note.style.padding = '0.5rem 0';
+            note.style.fontStyle = 'italic';
+            note.textContent = '→ ' + f.sentence;
+            children.appendChild(note);
+          });
+          taxSection.appendChild(children);
+        }
+
+        tree.appendChild(taxSection);
+      }
+
+      // Group: Deductions (new/changed)
+      const significantDeductions = deductionChanges.filter(f => 
+        !f.sentence.includes('ZAR 0,00') && !f.sentence.includes('ZAR 0.00')
+      );
+      
+      if (significantDeductions.length > 0) {
+        const deductionSection = document.createElement('div');
+        deductionSection.className = 'impact-node';
+
+        significantDeductions.forEach(fact => {
+          deductionSection.appendChild(createImpactNode(fact));
+        });
+
+        // Related causals
+        const deductionCausals = causalFacts.filter(f => 
+          f.sentence.toLowerCase().includes('deduction') ||
+          f.sentence.toLowerCase().includes('advance')
+        );
+        if (deductionCausals.length > 0) {
+          const children = document.createElement('div');
+          children.className = 'impact-children';
+          deductionCausals.forEach(f => {
+            const note = document.createElement('div');
+            note.className = 'impact-detail';
+            note.style.padding = '0.5rem 0';
+            note.style.fontStyle = 'italic';
+            note.textContent = '→ ' + f.sentence;
+            children.appendChild(note);
+          });
+          deductionSection.appendChild(children);
+        }
+
+        tree.appendChild(deductionSection);
+      }
+
+      // Group: Earnings (if any changed)
+      if (earningChanges.length > 0) {
+        const earningsSection = document.createElement('div');
+        earningsSection.className = 'impact-node';
+
+        earningChanges.forEach(fact => {
+          earningsSection.appendChild(createImpactNode(fact));
+        });
+
+        tree.appendChild(earningsSection);
+      }
+    }
+
+    function createImpactNode(fact, isRoot = false) {
+      const node = document.createElement('div');
+      node.className = 'impact-item' + (isRoot ? ' root' : '');
+
+      // Determine badge type
+      let badgeType = 'change';
+      let badgeText = 'Change';
+      
+      if (fact.sentence.includes('increased')) {
+        badgeType = 'increase';
+        badgeText = '↑ Increase';
+      } else if (fact.sentence.includes('decreased')) {
+        badgeType = 'decrease';
+        badgeText = '↓ Decrease';
+      } else if (fact.type.includes('added')) {
+        badgeType = 'added';
+        badgeText = '+ New';
+      } else if (fact.type.includes('removed')) {
+        badgeType = 'decrease';
+        badgeText = '- Removed';
+      }
+
+      // Extract label and detail
+      let label = fact.sentence.split(' increased')[0].split(' decreased')[0];
+      if (label.startsWith('Your ')) label = label.substring(5);
+      if (label.startsWith('A new deduction for ')) label = label.substring(20).split(' of ')[0];
+      
+      const detail = fact.sentence;
+
+      node.innerHTML = `
+        <div class="impact-header">
+          <span class="impact-badge ${badgeType}">${badgeText}</span>
+          <span class="impact-label">${label}</span>
+        </div>
+        <div class="impact-detail">${detail}</div>
+      `;
+
+      return node;
+    }
+
+    async function loadPeriods() {
+      try {
+        const res = await fetch('/api/periods');
+        const data = await res.json();
+        
+        periods = data.periods;
+        llmAvailable = data.llmAvailable;
+
+        if (llmAvailable) {
+          llmStatus.textContent = '✓ Ready';
+          llmStatus.classList.remove('disabled');
+        } else {
+          llmStatus.textContent = '✗ No API Key';
+          llmStatus.classList.add('disabled');
+          useLlmCheckbox.checked = false;
+          useLlmCheckbox.disabled = true;
+        }
+
+        periodSelect.innerHTML = '<option value="">Choose a period...</option>';
+        periods.forEach(p => {
+          if (p.hasPrevious) {
+            const opt = document.createElement('option');
+            opt.value = `${p.month}/${p.year}`;
+            opt.textContent = `${p.monthName} ${p.year}`;
+            periodSelect.appendChild(opt);
+          }
+        });
+
+        compareBtn.disabled = true;
+      } catch (err) {
+        console.error('Failed to load periods:', err);
+        periodSelect.innerHTML = '<option value="">Error loading</option>';
+      }
+    }
+
+    periodSelect.addEventListener('change', () => {
+      compareBtn.disabled = !periodSelect.value;
+    });
+
+    compareBtn.addEventListener('click', async () => {
+      const [month, year] = periodSelect.value.split('/');
+      const useLLM = useLlmCheckbox.checked && llmAvailable;
+
+      loading.classList.add('active');
+      results.classList.remove('active');
+      error.classList.remove('active');
+      compareBtn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/compare/${month}/${year}?llm=${useLLM}`);
+        const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        document.getElementById('prev-period').textContent = data.periods.previous.monthName;
+        document.getElementById('curr-period').textContent = data.periods.current.monthName;
+        
+        const netChange = data.summary.netPayDelta;
+        const netChangeEl = document.getElementById('net-change');
+        netChangeEl.textContent = (netChange >= 0 ? '+' : '') + formatZAR(netChange);
+        netChangeEl.className = 'stat-value ' + (netChange >= 0 ? 'positive' : 'negative');
+
+        document.getElementById('total-changes').textContent = data.summary.totalChanges;
+        document.getElementById('explanation').textContent = data.explanation;
+
+        buildImpactTree(data.facts);
+
+        results.classList.add('active');
+      } catch (err) {
+        error.textContent = '⚠️ ' + err.message;
+        error.classList.add('active');
+      } finally {
+        loading.classList.remove('active');
+        compareBtn.disabled = false;
+      }
+    });
+
+    loadPeriods();
+  </script>
+</body>
+</html>
